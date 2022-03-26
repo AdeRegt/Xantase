@@ -4,10 +4,33 @@ With Xantase you can easly generate webpages like one would normally do with lan
 
 Here is table of contents to easly navigate between capitals:
 1. [Syntax](#syntax)
+    1. [Functions](#function)
+    2. [Variables creation]($createvar)
 2. [Examples](#examples)
 3. [Usages](#usages)
 
 ## Syntax
+### Function
+You can make a function in two ways:
+``` function [functionname] with rootdoc data params ```
+OR
+``` function [functionname] ```
+functionname can be anything you want, but it should not include any spaces
+the "rootdoc data params" cannot be chanced for the build function for other functions, only with is nessesery when you use parameters
+### createvar
+You can create a variable in two ways:
+``` create [subtype] [type] called [name] ```
+or
+``` create [subtype] [type] called [name] and set value to [value] ```
+where
+types:
+1. variable
+    1. subtype: string
+    2. subtype: number
+2. node
+    1. all HTML tags
+Name can be anything you want, but it should not include any spaces
+Value can be a string or a number
 
 ## Examples
 

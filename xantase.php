@@ -8,6 +8,12 @@ if (! function_exists('str_ends_with')) {
     }
 }
 
+if (! function_exists('str_contains')) {
+    function str_contains($haystack, $needle) {
+        return $needle !== '' && strpos($haystack, $needle) !== false;
+    }
+}
+
 /**
  * This is the common exception class for known errors for Xantase interpeting
  */
@@ -48,6 +54,27 @@ class Xantase {
         $result = "";
         $result .= $this->xantase_get_base_classes();
         $result .= $this->xantase_interpetate_dir($dir);
+
+        $empt = explode("\n",$result);
+        $spac = Array();
+        foreach($empt as $e){
+            array_push($spac,trim($e));
+        }
+
+        $result = "";
+        $ewe = 0;
+        foreach($spac as $s){
+            if(str_contains($s,"}")){
+                $ewe--;
+            }
+            for($i = 0 ; $i < $ewe ; $i++){
+                $result .= "\t";
+            }
+            $result .= $s . "\n";
+            if(str_contains($s,"{")){
+                $ewe++;
+            }
+        }
         return $result;
     }
 

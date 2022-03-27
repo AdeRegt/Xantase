@@ -5,7 +5,8 @@ With Xantase you can easly generate webpages like one would normally do with lan
 Here is table of contents to easly navigate between capitals:
 1. [Syntax](#syntax)
     1. [Functions](#function)
-    2. [Variables creation]($createvar)
+    2. [Variables creation](#createvar)
+    2. [Update variables](#setvar)
 2. [Examples](#examples)
 3. [Usages](#usages)
 
@@ -31,6 +32,11 @@ types:
     1. all HTML tags
 Name can be anything you want, but it should not include any spaces
 Value can be a string or a number
+## setvar
+You can set a variable in one ways:
+``` set [property] [subproperty] of [varname] to [value] ```
+where
+
 
 ## Examples
 

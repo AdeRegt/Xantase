@@ -32,6 +32,7 @@
                         if(typeof(objecttobindto)==='string'){
                             objecttobindto = document.getElementById(objecttobindto);
                         }
+                        objecttobindto.innerHTML = '';
                         var us = new classname();
                         us.build(objecttobindto,this.getData(),data);
                     }
@@ -40,22 +41,35 @@
 
 
 class HelloWorld extends XantaseBuildable{
-		// function build with rootdoc data params
-	build(rootdoc, data, params) {
-		// create h1 node called h1elem
-		var h1elem = document.createElement("h1");
-		// create string variable called gingerbread and set value to "This is an example of xantase!"
-		var gingerbread;
-		gingerbread = "This is an example of xantase!";
-		// set property innerHTML of h1elem to gingerbread
-		h1elem.innerHTML = gingerbread;
-		// call appendChild of rootdoc with h1elem 
-		rootdoc.appendChild(h1elem);
-		// create HelloWorld variable called ins
-		var ins;
-		// if ewe of params is 1 then call build of ins with rootdoc data
-		
-		// end function
-		}
+// function build with rootdoc data params
+build(rootdoc, data, params) {
+// create h1 node called h1elem
+var h1elem = document.createElement("h1");
+// create string variable called gingerbread and set value to "This is an example of xantase!"
+var gingerbread;
+gingerbread = "This is an example of xantase!";
+// set property innerHTML of h1elem to gingerbread
+h1elem.innerHTML = gingerbread;
+// call appendChild of rootdoc with h1elem 
+rootdoc.appendChild(h1elem);
+// foreach params as pew for spawn ListItem on rootdoc using pew
+for (let pew of params) {
+(new ListItem()).build(rootdoc,data,pew);
+}
+// end function
+}
+
+}
+
+
+class ListItem extends XantaseBuildable{
+// function build with rootdoc data params
+build(rootdoc, data, params) {
+// create div node called lid
+var lid = document.createElement("div");
+// call appendChild of rootdoc with lid 
+rootdoc.appendChild(lid);
+// end function
+}
 
 }

@@ -90,6 +90,7 @@ class Xantase {
                         if(typeof(objecttobindto)==='string'){
                             objecttobindto = document.getElementById(objecttobindto);
                         }
+                        objecttobindto.innerHTML = '';
                         var us = new classname();
                         us.build(objecttobindto,this.getData(),data);
                     }
@@ -218,7 +219,7 @@ class Xantase {
         if($type=="variable"){
             $res .= "var $name";
             if(count($lines)>5){
-                $res .= ";\n\t\t";
+                $res .= ";\n";
                 $and = $lines[5]["contents"];
                 if($and!="and"){
                     $xe->appendToMessage("Expected: and ");
@@ -241,7 +242,6 @@ class Xantase {
     }
 
     private function xantase_builder_gen_set(XantaseException $xe,Array $lines,?String $varname): String{
-        // set property innerHTML of h1elem to gingerbread
         $result = "";
         $i = 0;
         $set_stat = $lines[$i++]["contents"];
@@ -293,7 +293,6 @@ class Xantase {
 
     private function xantase_builder_gen_call(XantaseException $xe,Array $lines): String{
         $result = "";
-        // call appendChild of rootdoc with gingerbread
         $i = 1;
         $parent = $lines[$i++]["contents"];
         $child = null;
@@ -321,6 +320,88 @@ class Xantase {
         return $result;
     }
 
+    private function xantase_builder_gen_spawn(XantaseException $xe,Array $lines): String{
+        $result = "";
+        $classname = $lines[1]["contents"];
+        $on = $lines[2]["contents"];
+        if($on!="on"){
+            $xe->appendToMessage("Expected: on");
+            throw $xe;
+        }
+        $base = $lines[3]["contents"];
+        $on = $lines[4]["contents"];
+        if($on!="using"){
+            $xe->appendToMessage("Expected: using");
+            throw $xe;
+        }
+        $params = $lines[5]["contents"];
+        $result = "(new $classname()).build($base,data,$params);";
+        return $result;
+    }
+
+    private function xantase_builder_gen_foreach(XantaseException $xe,Array $lines): String{
+        $result = "";
+        // foreach params as pew for 
+        $attA = $lines[1]["contents"];
+        $attB = $lines[2]["contents"];
+        $attC = $lines[3]["contents"];
+        $attD = $lines[4]["contents"];
+        if($attB!="as"){
+            $xe->appendToMessage("Expected: as");
+            throw $xe;
+        }
+        if($attD!="for"){
+            $xe->appendToMessage("Expected: for");
+            throw $xe;
+        }
+        $result .= "for (let $attC of $attA) {\n";
+        $result .= $this->xantase_builder_line($xe,array_splice($lines,5)) . "\n";
+        $result .= "}";
+        return $result;
+    }
+
+    private function xantase_builder_line(XantaseException $xe,Array $lines): String{
+        $datset = "";
+        $prima = $lines[0];
+        if($prima["isstring"]){
+            $xe->appendToMessage($xe->getMessage() . "First token in a line cannot be a string");
+            throw $xe;
+        }
+        switch($prima["contents"]){
+            case "function":
+                // create a function....
+                $datset .= $this->xantase_builder_gen_func($xe,$lines);
+                break;
+            case "create":
+                // create a variable....
+                $datset .= $this->xantase_builder_gen_create($xe,$lines);
+                break;
+            case "set":
+                // set a variable....
+                $datset .= $this->xantase_builder_gen_set($xe,$lines,null);
+                break;
+            case "call":
+                // call a function
+                $datset .= $this->xantase_builder_gen_call($xe,$lines);
+                break;
+            case "spawn":
+                // spawn a template
+                $datset .= $this->xantase_builder_gen_spawn($xe,$lines);
+                break;
+            case "foreach":
+                $datset .= $this->xantase_builder_gen_foreach($xe,$lines);
+                break;
+            case "end":
+                $datset .= "}";
+                break;
+            default:
+                $xe->appendToMessage("Unknown token: " . $prima["contents"]);
+                throw $xe;
+                break;
+        }
+        return $datset;
+    }
+
     /**
      * Creates the classcode for the created String
      * @param String $command_string the string we need to interpetate
@@ -339,47 +420,13 @@ class Xantase {
         foreach($lineset as $lineno => $line){
             $lineset[$lineno] = $this->xantase_tokenise_string($line);
         }
-        $withtab = false;
         foreach($lineset as $linenumber => $lines){
             if(empty($lines)){
                 continue;
             }
             $xe = new XantaseException("Error in class $classname line " . ($linenumber + 1) . ":  " . $linebuffer[$linenumber] . " :: ");
-            $prima = $lines[0];
-            if($prima["isstring"]){
-                $xe->appendToMessage($xe->getMessage() . "First token in a line cannot be a string");
-                throw $xe;
-            }
-            $datset .= ($withtab?"\t":"") . "\t// " . $linebuffer[$linenumber] . "\n\t" . ($withtab?"\t":"");
-            switch($prima["contents"]){
-                case "function":
-                    // create a function....
-                    $datset .= $this->xantase_builder_gen_func($xe,$lines);
-                    $withtab = true;
-                    break;
-                case "create":
-                    // create a variable....
-                    $datset .= $this->xantase_builder_gen_create($xe,$lines);
-                    break;
-                case "set":
-                    // set a variable....
-                    $datset .= $this->xantase_builder_gen_set($xe,$lines,null);
-                    break;
-                case "call":
-                    // call a function
-                    $datset .= $this->xantase_builder_gen_call($xe,$lines);
-                    break;
-                case "if":
-                    break;
-                case "end":
-                    $datset .= "}";
-                    $withtab = false;
-                    break;
-                default:
-                    $xe->appendToMessage("Unknown token: " . $prima["contents"]);
-                    throw $xe;
-                    break;
-            }
+            $datset .= "// " . $linebuffer[$linenumber] . "\n";
+            $datset .= $this->xantase_builder_line($xe,$lines);
             $datset .= "\n";
         }
 
@@ -387,7 +434,7 @@ class Xantase {
             throw new XantaseException("$classname has no build function!!");
         }
 
-        $result = "class $classname extends XantaseBuildable{\n\t" . $datset . "\n}";
+        $result = "class $classname extends XantaseBuildable{\n" . $datset . "\n}";
         return $result;
     } 
 }

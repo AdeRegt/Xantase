@@ -6,7 +6,8 @@ Here is table of contents to easly navigate between capitals:
 1. [Syntax](#syntax)
     1. [Functions](#function)
     2. [Variables creation](#createvar)
-    2. [Update variables](#setvar)
+    3. [Update variables](#setvar)
+    4. [Call](#call)
 2. [Examples](#examples)
 3. [Usages](#usages)
 
@@ -18,7 +19,7 @@ OR
 ``` function [functionname] ```
 functionname can be anything you want, but it should not include any spaces
 the "rootdoc data params" cannot be chanced for the build function for other functions, only with is nessesery when you use parameters
-### createvar
+### Createvar
 You can create a variable in two ways:
 ``` create [subtype] [type] called [name] ```
 or
@@ -32,10 +33,12 @@ types:
     1. all HTML tags
 Name can be anything you want, but it should not include any spaces
 Value can be a string or a number
-## setvar
-You can set a variable in one ways:
+## Setvar
+You can set a variable in two ways:
 ``` set [property] [subproperty] of [varname] to [value] ```
-where
+or
+``` set value of [varname] to [value] ```
+## Call
 
 
 ## Examples

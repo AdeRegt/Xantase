@@ -33,6 +33,18 @@ class XantaseException extends Exception{
 
 class Xantase {
 
+    private $classname;
+    private $linenumber;
+    private function report_error(String $message): void{
+        throw new XantaseException("
+            An error occured:
+            - Message: $message
+
+            - Class: " . $this->classname . "
+            - Linenumber: " . $this->linenumber . "
+        ");
+    }
+
     /**
      * Build xantase files in directory and output in file
      * @param String $dir directory where all the files are
@@ -203,10 +215,10 @@ class Xantase {
 
     private $hasbuild = false;
 
-    private function xantase_builder_gen_func(XantaseException $xe,Array $lines): String{
+    private function xantase_builder_gen_func(Array $lines): String{
         $datset = "";
         if(count($lines)<=2){
-            $xe->appendToMessage("Function not defined as we expected!");
+            $this->report_error("Function not defined as we expected!");
         }
         $functionname = $lines[1]["contents"];
         if($functionname==="build"){
@@ -216,7 +228,7 @@ class Xantase {
         if(count($lines)>=2){
             $withident = $lines[2]["contents"];
             if($withident!="with"){
-                $xe->appendToMessage("Expected with");
+                $this->report_error("Expected with");
             }
             for($i = 3 ; $i < count($lines) ; $i++){
                 array_push($argx,$lines[$i]["contents"]);
@@ -226,19 +238,17 @@ class Xantase {
         return $datset;
     }
 
-    private function xantase_builder_gen_create(XantaseException $xe,Array $lines): String{
+    private function xantase_builder_gen_create(Array $lines): String{
         $res = "";
         if(!count($lines)>=5){
-            $xe->appendToMessage("CREATE invalid formed");
-            throw $xe;
+            $this->report_error("CREATE invalid formed");
         }
         $subtype = $lines[1]["contents"];
         $type = $lines[2]["contents"];
         $called = $lines[3]["contents"];
         $name = $lines[4]["contents"];
         if($called!="called"){
-            $xe->appendToMessage("Expected: called");
-            throw $xe;
+            $this->report_error("Expected: called");
         }
         if($type=="variable"){
             $res .= "var $name";
@@ -246,11 +256,10 @@ class Xantase {
                 $res .= ";\n";
                 $and = $lines[5]["contents"];
                 if($and!="and"){
-                    $xe->appendToMessage("Expected: and ");
-                    throw $xe;
+                    $this->report_error("Expected: and ");
                 }
                 $st = array_splice($lines,6);
-                $res .= $this->xantase_builder_gen_set($xe,$st,$name);
+                $res .= $this->xantase_builder_gen_set($st,$name);
             }else{
                 if($subtype=="string"){
                     $res .= "= \"\"";
@@ -264,29 +273,26 @@ class Xantase {
         }else if($type=="node"){
             $res .= "var $name = document.createElement(\"$subtype\")";
             if(count($lines)>5){
-                $xe->appendToMessage("Command length exeed for type node");
-                throw $xe;
+                $this->report_error("Command length exeed for type node");
             }
             $res .= ";";
         }
         return $res;
     }
 
-    private function xantase_builder_gen_set(XantaseException $xe,Array $lines,?String $varname): String{
+    private function xantase_builder_gen_set(Array $lines,?String $varname): String{
         $result = "";
         $i = 0;
         $set_stat = $lines[$i++]["contents"];
         if($set_stat!="set"){
-            $xe->appendToMessage("Expected: set");
-            throw $xe;
+            $this->report_error("Expected: set");
         }
         $stat_stat = $lines[$i++]["contents"];
         $stat_oper = null;
         if($stat_stat=="property"){
             $stat_oper = $lines[$i++]["contents"];
         }else if($stat_stat!="value"){
-            $xe->appendToMessage("Invalid type [$stat_stat]");
-            throw $xe;
+            $this->report_error("Invalid type [$stat_stat]");
         }
         $of_stat = $lines[$i++]["contents"];
         if($of_stat=="of"){
@@ -295,12 +301,11 @@ class Xantase {
         }
         $rs = "null";
         if($of_stat=="to"){
-            $rs = $this->xantase_builder_gen_res($xe,array_splice($lines,$i));
+            $rs = $this->xantase_builder_gen_res(array_splice($lines,$i));
         }else if($of_stat=="from"){
-            $rs = $this->xantase_builder_gen_call($xe,array_splice($lines,$i));
+            $rs = $this->xantase_builder_gen_call(array_splice($lines,$i));
         }else{
-            $xe->appendToMessage("Expected: to or from");
-            throw $xe;
+            $this->report_error("Expected: to or from");
         }
         $result .= "$varname";
         if(isset($stat_oper)){
@@ -311,11 +316,10 @@ class Xantase {
         return $result;
     }
 
-    private function xantase_builder_gen_res(XantaseException $xe,Array $lines): String{
+    private function xantase_builder_gen_res(Array $lines): String{
         $result = "";
         if(empty($lines)){
-            $xe->appendToMessage("Value expected");
-            throw $xe;
+            $this->report_error("Value expected");
         }
         $tw = $lines[0];
         if($tw["isstring"]){
@@ -330,7 +334,7 @@ class Xantase {
         return $result;
     }
 
-    private function xantase_builder_gen_args(XantaseException $xe,Array $lines): Array{
+    private function xantase_builder_gen_args(Array $lines): Array{
         $args = Array();
         for($t = 0 ; $t < count($lines) ; $t++){
             $deze = $lines[$t];
@@ -343,7 +347,7 @@ class Xantase {
         return $args;
     }
 
-    private function xantase_builder_gen_call(XantaseException $xe,Array $lines): String{
+    private function xantase_builder_gen_call(Array $lines): String{
         $result = "";
         $i = 1;
         $parent = $lines[$i++]["contents"];
@@ -359,7 +363,7 @@ class Xantase {
                 }
             }
             if($i!=count($lines)&&$cmd=="with"){
-                $args = $this->xantase_builder_gen_args($xe,array_slice($lines,$i));
+                $args = $this->xantase_builder_gen_args(array_slice($lines,$i));
             }
         }
         $result .= $parent;
@@ -370,26 +374,24 @@ class Xantase {
         return $result;
     }
 
-    private function xantase_builder_gen_spawn(XantaseException $xe,Array $lines): String{
+    private function xantase_builder_gen_spawn(Array $lines): String{
         $result = "";
         $classname = $lines[1]["contents"];
         $on = $lines[2]["contents"];
         if($on!="on"){
-            $xe->appendToMessage("Expected: on");
-            throw $xe;
+            $this->report_error("Expected: on");
         }
         $base = $lines[3]["contents"];
         $on = $lines[4]["contents"];
         if($on!="using"){
-            $xe->appendToMessage("Expected: using");
-            throw $xe;
+            $this->report_error("Expected: using");
         }
         $params = $lines[5]["contents"];
         $result = "(new $classname()).build($base,data,$params);";
         return $result;
     }
 
-    private function xantase_builder_gen_foreach(XantaseException $xe,Array $lines): String{
+    private function xantase_builder_gen_foreach(Array $lines): String{
         $result = "";
         // foreach params as pew for 
         $attA = $lines[1]["contents"];
@@ -397,56 +399,52 @@ class Xantase {
         $attC = $lines[3]["contents"];
         $attD = $lines[4]["contents"];
         if($attB!="as"){
-            $xe->appendToMessage("Expected: as");
-            throw $xe;
+            $this->report_error("Expected: as");
         }
         if($attD!="for"){
-            $xe->appendToMessage("Expected: for");
-            throw $xe;
+            $this->report_error("Expected: for");
         }
         $result .= "for (let $attC of $attA) {\n";
-        $result .= $this->xantase_builder_line($xe,array_splice($lines,5)) . "\n";
+        $result .= $this->xantase_builder_line(array_splice($lines,5)) . "\n";
         $result .= "}";
         return $result;
     }
 
-    private function xantase_builder_line(XantaseException $xe,Array $lines): String{
+    private function xantase_builder_line(Array $lines): String{
         $datset = "";
         $prima = $lines[0];
         if($prima["isstring"]){
-            $xe->appendToMessage($xe->getMessage() . "First token in a line cannot be a string");
-            throw $xe;
+            $this->report_error("First token in a line cannot be a string");
         }
         switch($prima["contents"]){
             case "function":
                 // create a function....
-                $datset .= $this->xantase_builder_gen_func($xe,$lines);
+                $datset .= $this->xantase_builder_gen_func($lines);
                 break;
             case "create":
                 // create a variable....
-                $datset .= $this->xantase_builder_gen_create($xe,$lines);
+                $datset .= $this->xantase_builder_gen_create($lines);
                 break;
             case "set":
                 // set a variable....
-                $datset .= $this->xantase_builder_gen_set($xe,$lines,null);
+                $datset .= $this->xantase_builder_gen_set($lines,null);
                 break;
             case "call":
                 // call a function
-                $datset .= $this->xantase_builder_gen_call($xe,$lines);
+                $datset .= $this->xantase_builder_gen_call($lines);
                 break;
             case "spawn":
                 // spawn a template
-                $datset .= $this->xantase_builder_gen_spawn($xe,$lines);
+                $datset .= $this->xantase_builder_gen_spawn($lines);
                 break;
             case "foreach":
-                $datset .= $this->xantase_builder_gen_foreach($xe,$lines);
+                $datset .= $this->xantase_builder_gen_foreach($lines);
                 break;
             case "end":
                 $datset .= "}";
                 break;
             default:
-                $xe->appendToMessage("Unknown token: " . $prima["contents"]);
-                throw $xe;
+                $this->report_error("Unknown token: " . $prima["contents"]);
                 break;
         }
         return $datset;
@@ -460,6 +458,7 @@ class Xantase {
      * @throws XantaseException when there is a error in the code 
      */
     public function xantase_interpetate_string(String $command_string,String $classname): String{
+        $this->classname = $classname;
         $datset = "";
         $this->hasbuild = false;
         if(empty($command_string)){
@@ -474,9 +473,9 @@ class Xantase {
             if(empty($lines)){
                 continue;
             }
-            $xe = new XantaseException("Error in class $classname line " . ($linenumber + 1) . ":  " . $linebuffer[$linenumber] . " :: ");
+            $this->linenumber = $linenumber;
             $datset .= "// " . $linebuffer[$linenumber] . "\n";
-            $datset .= $this->xantase_builder_line($xe,$lines);
+            $datset .= $this->xantase_builder_line($lines);
             $datset .= "\n";
         }
 

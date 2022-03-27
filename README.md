@@ -8,22 +8,23 @@ Here is table of contents to easly navigate between capitals:
     2. [Variables creation](#createvar)
     3. [Update variables](#setvar)
     4. [Call](#call)
+    5. [Spawn](#spawn)
+    6. [Foreach](#foreach)
 2. [Examples](#examples)
 3. [Usages](#usages)
 
 ## Syntax
 ### Function
-You can make a function in two ways:
-``` function [functionname] with rootdoc data params ```
-OR
-``` function [functionname] ```
+You can make a function in these ways:
+1. ``` function [functionname] with rootdoc data params ```
+2. ``` function [functionname] ```
+3. ``` function [functionname] with [...] ```
 functionname can be anything you want, but it should not include any spaces
 the "rootdoc data params" cannot be chanced for the build function for other functions, only with is nessesery when you use parameters
 ### Createvar
-You can create a variable in two ways:
-``` create [subtype] [type] called [name] ```
-or
-``` create [subtype] [type] called [name] and set value to [value] ```
+You can create a variable in these ways:
+1. ``` create [subtype] [type] called [name] ```
+2. ``` create [subtype] [type] called [name] and [setvar] ```
 where
 types:
 1. variable
@@ -32,14 +33,20 @@ types:
 2. node
     1. all HTML tags
 Name can be anything you want, but it should not include any spaces
-Value can be a string or a number
-## Setvar
-You can set a variable in two ways:
-``` set [property] [subproperty] of [varname] to [value] ```
-or
-``` set value of [varname] to [value] ```
-## Call
-
+setvar = see setvar type but you can leave the ``` of [varname] ``` part
+### Setvar
+You can set a variable in these ways:
+1. ``` set [property] [subproperty] of [varname] to [value] ```
+2. ``` set value of [varname] to [value] ```
+3. ``` set [property] [subproperty] of [varname] from [call] ```
+### Call
+You can call a function in these ways:
+1. ``` call [function] of [varname] with [...] ```
+2. ``` call [function] of [varname] ```
+3. ``` call [function] with [...] ```
+4. ``` call [function] ```
+### Spawn
+### Foreach
 
 ## Examples
 

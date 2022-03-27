@@ -178,28 +178,25 @@ class Xantase {
      */
     private function xantase_tokenise_string(String $tok): Array{
         $result = Array();
-        $tok = trim($tok);
-        if(!empty($tok)){
-            $toks = str_split($tok);
-            $buffer = "";
-            $isstring = false;
-            foreach($toks as $to){
-                if($to===' '&&!$isstring&&!empty($buffer)){
+        $toks = str_split(trim($tok));
+        $buffer = "";
+        $isstring = false;
+        foreach($toks as $to){
+            if($to===' '&&!$isstring&&!empty($buffer)){
+                array_push($result,Array("isstring" => $isstring,"contents" => $buffer));
+                $buffer = "";
+            }else if($to=='"'){
+                if($isstring||!empty($buffer)){
                     array_push($result,Array("isstring" => $isstring,"contents" => $buffer));
                     $buffer = "";
-                }else if($to=='"'){
-                    if(!empty($buffer)){
-                        array_push($result,Array("isstring" => $isstring,"contents" => $buffer));
-                        $buffer = "";
-                    }
-                    $isstring = $isstring===false;
-                }else{
-                    $buffer .= $to;
                 }
+                $isstring = $isstring===false;
+            }else{
+                $buffer .= $to;
             }
-            if(!empty($buffer)){
-                array_push($result,Array("isstring" => $isstring,"contents" => $buffer));
-            }
+        }
+        if(!empty($buffer)){
+            array_push($result,Array("isstring" => $isstring,"contents" => $buffer));
         }
         return $result;
     }
@@ -255,6 +252,13 @@ class Xantase {
                 $st = array_splice($lines,6);
                 $res .= $this->xantase_builder_gen_set($xe,$st,$name);
             }else{
+                if($subtype=="string"){
+                    $res .= "= \"\"";
+                }else if($subtype=="number"){
+                    $res .= "= 0";
+                }else{
+                    $res .= "= null";
+                }
                 $res .= ";";
             }            
         }else if($type=="node"){
@@ -289,11 +293,15 @@ class Xantase {
             $varname = $lines[$i++]["contents"];
             $of_stat = $lines[$i++]["contents"];
         }
-        if($of_stat!="to"){
-            $xe->appendToMessage("Expected: to");
+        $rs = "null";
+        if($of_stat=="to"){
+            $rs = $this->xantase_builder_gen_res($xe,array_splice($lines,$i));
+        }else if($of_stat=="from"){
+            $rs = $this->xantase_builder_gen_call($xe,array_splice($lines,$i));
+        }else{
+            $xe->appendToMessage("Expected: to or from");
             throw $xe;
         }
-        $rs = $this->xantase_builder_gen_res($xe,array_splice($lines,$i));
         $result .= "$varname";
         if(isset($stat_oper)){
             $result .= ".".$stat_oper;
@@ -305,6 +313,10 @@ class Xantase {
 
     private function xantase_builder_gen_res(XantaseException $xe,Array $lines): String{
         $result = "";
+        if(empty($lines)){
+            $xe->appendToMessage("Value expected");
+            throw $xe;
+        }
         $tw = $lines[0];
         if($tw["isstring"]){
             $result .= "\"";
@@ -316,6 +328,19 @@ class Xantase {
             $result .= "" . $tw["contents"] . "";
         }
         return $result;
+    }
+
+    private function xantase_builder_gen_args(XantaseException $xe,Array $lines): Array{
+        $args = Array();
+        for($t = 0 ; $t < count($lines) ; $t++){
+            $deze = $lines[$t];
+            if($deze["isstring"]){
+                array_push($args,"\"" . $deze["contents"] . "\"");
+            }else{
+                array_push($args,$deze["contents"]);
+            }
+        }
+        return $args;
     }
 
     private function xantase_builder_gen_call(XantaseException $xe,Array $lines): String{
@@ -334,9 +359,7 @@ class Xantase {
                 }
             }
             if($i!=count($lines)&&$cmd=="with"){
-                for($t = $i ; $t < count($lines) ; $t++){
-                    array_push($args,$lines[$t]["contents"]);
-                }
+                $args = $this->xantase_builder_gen_args($xe,array_slice($lines,$i));
             }
         }
         $result .= $parent;

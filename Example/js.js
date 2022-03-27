@@ -69,6 +69,18 @@ class ListItem extends XantaseBuildable{
 		var lid = document.createElement("div");
 		// call appendChild of rootdoc with lid
 		rootdoc.appendChild(lid);
+		// create h1 node called uname
+		var uname = document.createElement("h1");
+		// set property style.backgroundColor of uname to "green"
+		uname.style.backgroundColor = "green";
+		// create string variable called liw
+		var liw= "";
+		// set value of liw from call concat of liw with params.id "# " params.name
+		liw = liw.concat(params.id, "# ",  params.name);;
+		// set property innerHTML of uname to liw
+		uname.innerHTML = liw;
+		// call appendChild of lid with uname
+		lid.appendChild(uname);
 		// end function
 	}
 	

@@ -30,7 +30,7 @@ class Xantase extends XantaseBuildable{
 			throw new Error('Not an Xantase object');
 		}
 		if(typeof(objecttobindto)==='string'){
-			objecttobindto = document.getElementById(objecttobindto);
+			objecttobindto = document.querySelector(objecttobindto);
 		}
 		objecttobindto.innerHTML = '';
 		var us = new classname();

@@ -127,7 +127,7 @@ class Xantase {
                             throw new Error('Not an Xantase object');
                         }
                         if(typeof(objecttobindto)==='string'){
-                            objecttobindto = document.getElementById(objecttobindto);
+                            objecttobindto = document.querySelector(objecttobindto);
                         }
                         objecttobindto.innerHTML = '';
                         var us = new classname();
@@ -290,6 +290,8 @@ class Xantase {
                 $this->report_error("Command length exeed for type node");
             }
             $res .= ";\n" . $edic . ".appendChild(" . $name . ");";
+        }else if($type=="query"){
+            $res .= "var $name = document.querySelector(\"$subtype\");";
         }
         return $res;
     }

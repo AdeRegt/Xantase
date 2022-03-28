@@ -29,7 +29,8 @@ the "rootdoc data params" cannot be chanced for the build function for other fun
 You can create a variable in these ways:
 
 1. ``` create [subtype] [type] called [name] ```
-2. ``` create [subtype] [type] called [name] and [setvar] ```
+2. ``` create [subtype] variable called [name] and [setvar] ```
+3. ``` create [subtype] node called [name] on [target] ```
 
 where
 

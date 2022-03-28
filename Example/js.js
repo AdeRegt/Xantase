@@ -41,20 +41,21 @@ class Xantase extends XantaseBuildable{
 
 
 class HelloWorld extends XantaseBuildable{
+	base = null;
 	// function build with rootdoc data params
 	build(rootdoc, data, params) {
+		this.base = rootdoc;
 		// create h1 node called h1elem
 		var h1elem = document.createElement("h1");
+		this.base.appendChild(h1elem);
 		// create string variable called gingerbread and set value to "This is an example of xantase!"
 		var gingerbread;
 		gingerbread = "This is an example of xantase!";
 		// set property innerHTML of h1elem to gingerbread
 		h1elem.innerHTML = gingerbread;
-		// call appendChild of rootdoc with h1elem
-		rootdoc.appendChild(h1elem);
 		// foreach params as pew for spawn ListItem on rootdoc using pew
 		for (let pew of params) {
-			(new ListItem()).build(rootdoc,data,pew);
+			(new ListItem()).build(rootdoc, data, pew);
 		}
 		// end function
 	}
@@ -63,24 +64,24 @@ class HelloWorld extends XantaseBuildable{
 
 
 class ListItem extends XantaseBuildable{
+	base = null;
 	// function build with rootdoc data params
 	build(rootdoc, data, params) {
+		this.base = rootdoc;
 		// create div node called lid
 		var lid = document.createElement("div");
-		// call appendChild of rootdoc with lid
-		rootdoc.appendChild(lid);
-		// create h1 node called uname
+		this.base.appendChild(lid);
+		// create h1 node called uname on lid
 		var uname = document.createElement("h1");
+		lid.appendChild(uname);
 		// set property style.backgroundColor of uname to "green"
 		uname.style.backgroundColor = "green";
 		// create string variable called liw
-		var liw= "";
+		var liw = "";
 		// set value of liw from call concat of liw with params.id "# " params.name
 		liw = liw.concat(params.id, "# ",  params.name);;
 		// set property innerHTML of uname to liw
 		uname.innerHTML = liw;
-		// call appendChild of lid with uname
-		lid.appendChild(uname);
 		// end function
 	}
 	

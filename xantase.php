@@ -234,7 +234,13 @@ class Xantase {
                 array_push($argx,$lines[$i]["contents"]);
             }
         }
+        if($functionname==="build"&&count($argx)!=3){
+            $this->report_error("The build function requires 3 parameters");
+        }
         $datset .= $functionname . "(" . implode(", ",$argx) . ") {";
+        if($functionname==="build"){
+            $datset .= "\nthis.base = " . $argx[0] . ";";
+        }
         return $datset;
     }
 
@@ -262,20 +268,28 @@ class Xantase {
                 $res .= $this->xantase_builder_gen_set($st,$name);
             }else{
                 if($subtype=="string"){
-                    $res .= "= \"\"";
+                    $res .= " = \"\"";
                 }else if($subtype=="number"){
-                    $res .= "= 0";
+                    $res .= " = 0";
                 }else{
-                    $res .= "= null";
+                    $res .= " = null";
                 }
                 $res .= ";";
             }            
         }else if($type=="node"){
             $res .= "var $name = document.createElement(\"$subtype\")";
-            if(count($lines)>5){
+            $edic = "this.base";
+            if(count($lines)==7){
+                $on = $lines[5]["contents"];
+                $target = $lines[6]["contents"];
+                if($on!="on"){
+                    $this->report_error("Expected: on");
+                }
+                $edic = $target;
+            }else if(count($lines)!=5){
                 $this->report_error("Command length exeed for type node");
             }
-            $res .= ";";
+            $res .= ";\n" . $edic . ".appendChild(" . $name . ");";
         }
         return $res;
     }
@@ -387,7 +401,7 @@ class Xantase {
             $this->report_error("Expected: using");
         }
         $params = $lines[5]["contents"];
-        $result = "(new $classname()).build($base,data,$params);";
+        $result = "(new $classname()).build($base, data, $params);";
         return $result;
     }
 
@@ -483,7 +497,7 @@ class Xantase {
             throw new XantaseException("$classname has no build function!!");
         }
 
-        $result = "class $classname extends XantaseBuildable{\n" . $datset . "\n}";
+        $result = "class $classname extends XantaseBuildable{\nbase = null;\n" . $datset . "\n}";
         return $result;
     } 
 }

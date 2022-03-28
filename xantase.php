@@ -424,6 +424,18 @@ class Xantase {
         return $result;
     }
 
+    private function xantase_builder_gen_js(Array $lines): String{
+        $awa = Array();
+        foreach(array_slice($lines,1) as $lx){
+            if($lx["isstring"]){
+                array_push($awa,"\"" . $lx["contents"] . "\"");
+            }else{
+                array_push($awa,$lx["contents"]);
+            }
+        }
+        return implode(" ",$awa);
+    }
+
     private function xantase_builder_line(Array $lines): String{
         $datset = "";
         $prima = $lines[0];
@@ -456,6 +468,11 @@ class Xantase {
                 break;
             case "end":
                 $datset .= "}";
+                break;
+            case "remark":
+                break;
+            case "js":
+                $datset .= $this->xantase_builder_gen_js($lines);
                 break;
             default:
                 $this->report_error("Unknown token: " . $prima["contents"]);

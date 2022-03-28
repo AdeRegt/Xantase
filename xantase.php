@@ -438,6 +438,64 @@ class Xantase {
         return implode(" ",$awa);
     }
 
+    private function xantase_builder_gen_if(Array $lines): String{
+        $result = "";
+        $commands = Array();
+        $isand = 0;
+        for($i = 1 ; $i < count($lines) ; $i++){
+            $cmdA = $lines[$i + 0];
+            $cmdB = $lines[$i + 1]["contents"];
+            $cmdC = $lines[$i + 2];
+            $cmdD = $lines[$i + 3]["contents"];
+
+            $ewe = "";
+            if($cmdA["isstring"]){
+                $ewe .= "\"" . $cmdA["contents"] . "\"";
+            }else{
+                $ewe .= "" . $cmdA["contents"] . "";
+            }
+            $ewe .= " ";
+            switch($cmdB){
+                case "equals":
+                    $ewe .= "==";
+                    break;
+                default:
+                    $this->report_error("Invalid operator: $cmdB ");
+                    break;
+            }
+            $ewe .= " ";
+            $ewe .= "";
+            if($cmdC["isstring"]){
+                $ewe .= "\"" . $cmdC["contents"] . "\"";
+            }else{
+                $ewe .= "" . $cmdC["contents"] . "";
+            }
+            array_push($commands,$ewe);
+            $i += 3;
+            if($cmdD=="then"){
+                $isand = 1;
+                break;
+            }else if($cmdD=="else"){
+                $isand = 2;
+                break;
+            }
+        }
+        $result .= "if(";
+        if($isand==2){
+            $result .= "!(";
+        }
+        $result .= implode(" AND ",$commands);
+        if($isand==2){
+            $result .= ")";
+        }
+        $result .= ")";
+        $result .= "{\n";
+        $result .= $this->xantase_builder_line(array_slice($lines,$i + 1));
+        $result .= "\n}";
+
+        return $result;
+    }
+
     private function xantase_builder_line(Array $lines): String{
         $datset = "";
         $prima = $lines[0];
@@ -475,6 +533,9 @@ class Xantase {
                 break;
             case "js":
                 $datset .= $this->xantase_builder_gen_js($lines);
+                break;
+            case "if":
+                $datset .= $this->xantase_builder_gen_if($lines);
                 break;
             default:
                 $this->report_error("Unknown token: " . $prima["contents"]);

@@ -305,7 +305,7 @@ class Xantase {
         }
         $stat_stat = $lines[$i++]["contents"];
         $stat_oper = null;
-        if($stat_stat=="property"){
+        if( $stat_stat=="property" || $stat_stat=="listener" ){
             $stat_oper = $lines[$i++]["contents"];
         }else if($stat_stat!="value"){
             $this->report_error("Invalid type [$stat_stat]");
@@ -323,11 +323,15 @@ class Xantase {
         }else{
             $this->report_error("Expected: to or from");
         }
-        $result .= "$varname";
-        if(isset($stat_oper)){
-            $result .= ".".$stat_oper;
+        if($stat_stat=="listener"){
+            $result .= $varname . ".addEventListener('" . $stat_oper . "'," . $rs . ")";
+        }else{
+            $result .= "$varname";
+            if(isset($stat_oper)){
+                $result .= ".".$stat_oper;
+            }
+            $result .= " = $rs";
         }
-        $result .= " = $rs";
         $result .= ";";
         return $result;
     }

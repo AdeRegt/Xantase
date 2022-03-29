@@ -41,7 +41,7 @@ class Xantase {
             - Message: $message
 
             - Class: " . $this->classname . "
-            - Linenumber: " . $this->linenumber . "
+            - Linenumber: " . ($this->linenumber + 1) . "
         ");
     }
 
@@ -194,8 +194,10 @@ class Xantase {
         $buffer = "";
         $isstring = false;
         foreach($toks as $to){
-            if($to===' '&&!$isstring&&!empty($buffer)){
-                array_push($result,Array("isstring" => $isstring,"contents" => $buffer));
+            if($to===' '&&!$isstring){
+                if(!empty($buffer)){
+                    array_push($result,Array("isstring" => $isstring,"contents" => $buffer));
+                }
                 $buffer = "";
             }else if($to=='"'){
                 if($isstring||!empty($buffer)){
@@ -346,6 +348,28 @@ class Xantase {
             $result .= "\"";
             $result .= $tw["contents"];
             $result .= "\""; 
+            if(count($lines)>1){
+                if($lines[1]["contents"]=="&"){
+                    $beol = false;
+                    for($i = 1 ; $i < count($lines) ; $i++){
+                        if($lines[$i]["contents"]=="&"){
+                            $result .= " + ";
+                            $beol = true;
+                        }else if($beol){
+                            $beol = false;
+                            if($lines[$i]["isstring"]){
+                                $result .= "\"" . $lines[$i]["contents"] . "\"";
+                            }else{
+                                $result .= $lines[$i]["contents"];
+                            }
+                        }else{
+                            $this->report_error("Unexpected statement");
+                        }
+                    }
+                }else{
+                    $this->report_error("Unexpected statement");
+                }
+            }
         }else if(is_numeric($tw["contents"])){
             $result .= $tw["contents"];
         }else{

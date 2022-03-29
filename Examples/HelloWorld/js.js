@@ -48,9 +48,9 @@ class HelloWorld extends XantaseBuildable{
 		// create h1 node called h1elem
 		var h1elem = document.createElement("h1");
 		this.base.appendChild(h1elem);
-		// create string variable called gingerbread and set value to "This is an example of xantase!"
+		// create string variable called gingerbread and set value to "This is an " & "example" & " of xantase!"
 		var gingerbread;
-		gingerbread = "This is an example of xantase!";
+		gingerbread = "This is an " + "example" + " of xantase!";
 		// set property innerHTML of h1elem to gingerbread
 		h1elem.innerHTML = gingerbread;
 		// foreach params as pew for spawn ListItem on rootdoc using pew
@@ -83,7 +83,7 @@ class ListItem extends XantaseBuildable{
 		// create string variable called liw
 		var liw = "";
 		// set value of liw from call concat of liw with params.id "# " params.name
-		liw = liw.concat(params.id, "# ",  params.name);;
+		liw = liw.concat(params.id, "# ", params.name);;
 		// set property innerHTML of uname to liw
 		uname.innerHTML = liw;
 		// end function

@@ -339,6 +339,7 @@ class Xantase {
     }
 
     private function xantase_builder_gen_res(Array $lines): String{
+        
         $result = "";
         if(empty($lines)){
             $this->report_error("Value expected");

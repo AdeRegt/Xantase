@@ -478,6 +478,12 @@ class Xantase {
                 case "equals":
                     $ewe .= "==";
                     break;
+                case "greater than":
+                    $ewe .= ">";
+                    break;
+                case "less than":
+                    $ewe .= "<";
+                    break;
                 default:
                     $this->report_error("Invalid operator: $cmdB ");
                     break;

@@ -399,7 +399,11 @@ class Xantase {
             if(($t+1)!=count($lines)){
                 if($lines[$t + 1]["contents"]=="of"){
                     if(($t+2)!=count($lines)){
-                        array_push($args,$lines[$t + 2]["contents"] . "." . $deze["contents"]);
+                        $tvu = $lines[$t + 2]["contents"];
+                        if(!in_array($tvu,$this->variableslist)){
+                            $this->report_error("Unknown variable: $tvu ");
+                        }
+                        array_push($args,$tvu . "." . $deze["contents"]);
                         $t += 2;
                         $tf = false;
                     }else{
@@ -536,16 +540,34 @@ class Xantase {
                 }
             }
 
-            $cmdA = $lines[$i + 0];
-            $cmdB = $lines[$i + 1]["contents"];
-            $cmdC = $lines[$i + 2];
-            $cmdD = $lines[$i + 3]["contents"];
+            $t = 0;
+            $cmdA = $lines[$i + $t++];
+            $cmdAA = null;
+            $cmdB = $lines[$i + $t++]["contents"];
+            if($cmdB=="of"){
+                $cmdAA = $cmdA;
+                $cmdA = $lines[$i + $t++];
+                $cmdB = $lines[$i + $t++]["contents"];
+            }
+            $cmdC = $lines[$i + $t++];
+            $cmdCC = null;
+            $cmdD = $lines[$i + $t++]["contents"];
+            if($cmdD=="of"){
+                $cmdCC = $cmdC;
+                $cmdC = $lines[$i + $t++];
+                $cmdD = $lines[$i + $t++]["contents"];
+            }
 
             $ewe = "";
             if($cmdA["isstring"]){
                 $ewe .= "\"" . $cmdA["contents"] . "\"";
-            }else{
+            }else if(is_numeric($cmdA["contents"])){
                 $ewe .= "" . $cmdA["contents"] . "";
+            }else{
+                if(!in_array($cmdA["contents"],$this->variableslist)){
+                    $this->report_error("Unknown variable: " . $cmdA["contents"]);
+                }
+                $ewe .= "" . $cmdA["contents"] . (isset($cmdAA)?(".".$cmdAA["contents"]):"") . "";
             }
             $ewe .= " ";
             switch($cmdB){
@@ -566,11 +588,16 @@ class Xantase {
             $ewe .= "";
             if($cmdC["isstring"]){
                 $ewe .= "\"" . $cmdC["contents"] . "\"";
-            }else{
+            }else if(is_numeric($cmdC["contents"])){
                 $ewe .= "" . $cmdC["contents"] . "";
+            }else{
+                if(!in_array($cmdC["contents"],$this->variableslist)){
+                    $this->report_error("Unknown variable: " . $cmdC["contents"]);
+                }
+                $ewe .= "" . $cmdC["contents"] . (isset($cmdCC)?".".$cmdCC["contents"]:"") . "";
             }
             array_push($commands,$ewe);
-            $i += 3;
+            $i += ($t-1);
             if($cmdD=="then"){
                 $isand = 1;
                 break;

@@ -57,8 +57,12 @@ var HelloWorld = class HelloWorld extends XantaseBuildable{
 		for (let pew of params) {
 			(new ListItem()).build(rootdoc, data, pew);
 		}
-		// if params[0].id equals 5 else js window.alert('ok')
-		if(!(params[0].id == 5)){
+		// create string variable called tmp
+		var tmp = "";
+		// set value of tmp from call at of params with 0
+		tmp = params.at();;
+		// if id of tmp equals 5 else js window.alert('ok')
+		if(!(tmp.id == 5)){
 			window.alert('ok')
 		}
 		// end function

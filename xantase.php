@@ -96,42 +96,44 @@ class Xantase {
      */
     public function xantase_get_base_classes(): String{
         return "
-                class XantaseBuildable{
-                    build(data){
-                        throw new Error('Invalid class');
-                    }
-                }
-
-                class Xantase extends XantaseBuildable{
-
-                    constructor(){
-                        super();
-                    }
-
-                    data = null;
-
-                    setData(d){
-                        this.data = d;
-                    }
-
-                    getData(){
-                        return this.data;
-                    }
-
-                    build(classname,objecttobindto,data){
-                        console.info('Buildcommand triggered of '+classname.name+' and placed in '+objecttobindto,data);
-                        if(typeof(classname)!=='function'){
+                if(typeof(XantaseBuildable)==='undefined'){
+                    class XantaseBuildable{
+                        build(data){
                             throw new Error('Invalid class');
                         }
-                        if(!(Object.getPrototypeOf(classname.prototype.constructor).name === 'XantaseBuildable')){
-                            throw new Error('Not an Xantase object');
+                    }
+
+                    class Xantase extends XantaseBuildable{
+
+                        constructor(){
+                            super();
                         }
-                        if(typeof(objecttobindto)==='string'){
-                            objecttobindto = document.querySelector(objecttobindto);
+
+                        data = null;
+
+                        setData(d){
+                            this.data = d;
                         }
-                        objecttobindto.innerHTML = '';
-                        var us = new classname();
-                        us.build(objecttobindto,this.getData(),data);
+
+                        getData(){
+                            return this.data;
+                        }
+
+                        build(classname,objecttobindto,data){
+                            console.info('Buildcommand triggered of '+classname.name+' and placed in '+objecttobindto,data);
+                            if(typeof(classname)!=='function'){
+                                throw new Error('Invalid class');
+                            }
+                            if(!(Object.getPrototypeOf(classname.prototype.constructor).name === 'XantaseBuildable')){
+                                throw new Error('Not an Xantase object');
+                            }
+                            if(typeof(objecttobindto)==='string'){
+                                objecttobindto = document.querySelector(objecttobindto);
+                            }
+                            objecttobindto.innerHTML = '';
+                            var us = new classname();
+                            us.build(objecttobindto,this.getData(),data);
+                        }
                     }
                 }
         ";
@@ -606,7 +608,7 @@ class Xantase {
             throw new XantaseException("$classname has no build function!!");
         }
 
-        $result = "class $classname extends XantaseBuildable{\nbase = null;\n" . $datset . "\n}";
+        $result = "if(typeof($classname)==='undefined'){\n\nclass $classname extends XantaseBuildable{\nbase = null;\n" . $datset . "\n}\n\n}\n";
         return $result;
     } 
 }

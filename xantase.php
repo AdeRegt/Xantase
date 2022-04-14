@@ -474,6 +474,25 @@ class Xantase {
         $commands = Array();
         $isand = 0;
         for($i = 1 ; $i < count($lines) ; $i++){
+
+            // find operators that has 2 words and merge them into 1 line
+            $keywords = array('greater', 'less');
+            foreach($keywords as $keyword){
+                $key = array_search($keyword, array_column($lines, 'contents'));  
+                if($key !== false){    
+                    foreach($lines as $index => &$line){  
+                        $nextOneExists = array_key_exists($index + 1, $lines);
+                        if($index == $key){
+                            $line['contents'] = $line['contents'] . ' ' . $lines[$key + 1]['contents'];
+                        }elseif(($index > $key &&! $index <= $key) && $nextOneExists){
+                            $line = $lines[$index + 1];
+                        }elseif(!$nextOneExists){
+                            unset($lines[$index]);
+                        }
+                    }
+                }
+            }
+
             $cmdA = $lines[$i + 0];
             $cmdB = $lines[$i + 1]["contents"];
             $cmdC = $lines[$i + 2];
@@ -489,6 +508,12 @@ class Xantase {
             switch($cmdB){
                 case "equals":
                     $ewe .= "==";
+                    break;
+                case "greater than":
+                    $ewe .= ">";
+                    break;
+                case "less than":
+                    $ewe .= "<";
                     break;
                 default:
                     $this->report_error("Invalid operator: $cmdB ");

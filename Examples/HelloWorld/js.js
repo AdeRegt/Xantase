@@ -83,7 +83,7 @@ var ListItem = class ListItem extends XantaseBuildable{
 		uname.style.backgroundColor = "green";
 		// create string variable called liw
 		var liw = "";
-		// set value of liw from call concat of liw with params.id "# " params.name
+		// set value of liw from call concat of liw with id of params "# " name of params
 		liw = liw.concat(params.id, "# ", params.name);;
 		// set property innerHTML of uname to liw
 		uname.innerHTML = liw;

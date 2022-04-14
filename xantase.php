@@ -33,8 +33,11 @@ class XantaseException extends Exception{
 
 class Xantase {
 
+    private $variableslist = Array();
+
     private $classname;
     private $linenumber;
+
     private function report_error(String $message): void{
         throw new XantaseException("
             An error occured:
@@ -222,6 +225,7 @@ class Xantase {
         if(count($lines)<=2){
             $this->report_error("Function not defined as we expected!");
         }
+        $this->variableslist = Array();
         $functionname = $lines[1]["contents"];
         if($functionname==="build"){
             $this->hasbuild = true;
@@ -233,6 +237,7 @@ class Xantase {
                 $this->report_error("Expected with");
             }
             for($i = 3 ; $i < count($lines) ; $i++){
+                array_push($this->variableslist,$lines[$i]["contents"]);
                 array_push($argx,$lines[$i]["contents"]);
             }
         }
@@ -255,6 +260,7 @@ class Xantase {
         $type = $lines[2]["contents"];
         $called = $lines[3]["contents"];
         $name = $lines[4]["contents"];
+        array_push($this->variableslist,$name);
         if($called!="called"){
             $this->report_error("Expected: called");
         }
@@ -316,6 +322,9 @@ class Xantase {
         if($of_stat=="of"){
             $varname = $lines[$i++]["contents"];
             $of_stat = $lines[$i++]["contents"];
+            if(!in_array($varname,$this->variableslist)){
+                $this->report_error("Unknown variable: $varname ");
+            }
         }
         $rs = "null";
         if($of_stat=="to"){
@@ -374,6 +383,9 @@ class Xantase {
         }else if(is_numeric($tw["contents"])){
             $result .= $tw["contents"];
         }else{
+            if(!in_array($tw["contents"],$this->variableslist)){
+                $this->report_error("Unknown variable: " . $tw["contents"]);
+            }
             $result .= "" . $tw["contents"] . "";
         }
         return $result;
@@ -383,10 +395,29 @@ class Xantase {
         $args = Array();
         for($t = 0 ; $t < count($lines) ; $t++){
             $deze = $lines[$t];
-            if($deze["isstring"]){
-                array_push($args,"\"" . $deze["contents"] . "\"");
-            }else{
-                array_push($args,$deze["contents"]);
+            $tf = true;
+            if(($t+1)!=count($lines)){
+                if($lines[$t + 1]["contents"]=="of"){
+                    if(($t+2)!=count($lines)){
+                        array_push($args,$lines[$t + 2]["contents"] . "." . $deze["contents"]);
+                        $t += 2;
+                        $tf = false;
+                    }else{
+                        $this->report_error("expected: x of y");
+                    }
+                }
+            }
+            if($tf){
+                if($deze["isstring"]){
+                    array_push($args,"\"" . $deze["contents"] . "\"");
+                }else if(is_numeric($deze["contents"])){
+                    array_push($args,$deze["contents"]);
+                }else{
+                    if(!in_array($deze["contents"],$this->variableslist)){
+                        $this->report_error("Unknown variable: " . $deze["contents"]);
+                    }
+                    array_push($args,$deze["contents"]);
+                }
             }
         }
         return $args;
@@ -432,6 +463,12 @@ class Xantase {
             $this->report_error("Expected: using");
         }
         $params = $lines[5]["contents"];
+        if(!in_array($base,$this->variableslist)){
+            $this->report_error("Unknown rootdocument variable: $base ");
+        }
+        if(!in_array($params,$this->variableslist)){
+            $this->report_error("Unknown parameter variable: $params");
+        }
         $result = "(new $classname()).build($base, data, $params);";
         return $result;
     }
@@ -449,9 +486,17 @@ class Xantase {
         if($attD!="for"){
             $this->report_error("Expected: for");
         }
+        if(in_array($attC,$this->variableslist)){
+            $this->report_error("Name already exists for the loop: $attC");
+        }
+        if(!in_array($attA,$this->variableslist)){
+            $this->report_error("Unknown variable: $attA");
+        }
+        $xval = array_push($this->variableslist,$attC);
         $result .= "for (let $attC of $attA) {\n";
         $result .= $this->xantase_builder_line(array_splice($lines,5)) . "\n";
         $result .= "}";
+        unset($this->variableslist[$xval]);
         return $result;
     }
 
